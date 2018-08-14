@@ -1,0 +1,2 @@
+# Scrapy_notes
+一个向往成为程序员的码奴的Scrapy学习笔记
