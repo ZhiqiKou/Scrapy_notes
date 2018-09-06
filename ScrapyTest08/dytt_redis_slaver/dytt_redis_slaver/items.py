@@ -9,12 +9,14 @@ import scrapy
 
 
 class DyttRedisSlaverItem(scrapy.Item):
-    # 译名
+    # 片名
     name = scrapy.Field()
     # 年代
     year = scrapy.Field()
     # 语言
     language = scrapy.Field()
+    # 类别
+    movie_type = scrapy.Field()
     # 上映日期
     release_date = scrapy.Field()
     # 评分

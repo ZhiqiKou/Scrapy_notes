@@ -24,11 +24,12 @@ class DyttSlaverSpider(RedisCrawlSpider):
     # 4. 增加redis-key
     redis_key = 'dytt:start_urls'
 
-    # page_links = LinkExtractor(allow=r'/index_\d*.html')
+    #page_links = LinkExtractor(allow=r'/index_\d*.html')
     movie_links = LinkExtractor(allow=r'/i/\d*.html', restrict_xpaths=('//div[@class="co_content8"]'))
 
     rules = (
-        # Rule(page_links),
+        # 翻页规则
+        #Rule(page_links),
         Rule(movie_links, callback='parse_item'),
     )
 
@@ -39,31 +40,6 @@ class DyttSlaverSpider(RedisCrawlSpider):
     #     super(DyttSlaverSpider, self).__init__(*args, **kwargs)
 
     def parse_item(self, response):
-        # for Zoom in response.xpath('//div[@id="Zoom"]'):
-        #     # Xpath会有偏差 改用正则表达式
-        #     items = DyttRedisSlaverItem()
-        #     # 译名
-        #     items['name'] = Zoom.xpath('//p[2]/text()').extract()[0]
-        #     # 年代
-        #     items['year'] = Zoom.xpath('//p[4]/text()').extract()[0]
-        #     # 产地
-        #     items['origin'] = Zoom.xpath('//p[5]/text()').extract()[0]
-        #     # 语言
-        #     items['language'] = Zoom.xpath('//p[7]/text()').extract()[0]
-        #     # 上映日期
-        #     items['release_date'] = Zoom.xpath('//p[9]/text()').extract()[0]
-        #     # 豆瓣评分
-        #     items['douban_score'] = Zoom.xpath('//p[10]/text()').extract()[0]
-        #     # 文件大小
-        #     items['file_size'] = Zoom.xpath('//p[14]/text()').extract()[0]
-        #     # 片长
-        #     items['film_time'] = Zoom.xpath('//p[15]/text()').extract()[0]
-        #     # 简介
-        #     items['introduction'] = Zoom.xpath('//p[2]/text()').extract()[0]
-        #     # 海报
-        #     items['posters'] = re.search(r'◎简　　介</p>([\s\S]*)<p>◎影片截图', str(response.body, encoding="gbk")).group(1)
-        #     # 下载链接(js加载，直接抓取不到，需要用selenium)
-        #     items['download_link'] = Zoom.xpath("//a//@*[9]").extract()
         items = DyttRedisSlaverItem()
 
         str_resp = response.body.decode('gb2312', errors='ignore')
@@ -72,7 +48,10 @@ class DyttSlaverSpider(RedisCrawlSpider):
             str_resp = str_resp.replace(rep, '')
 
         title = re.search(r'◎片　　名(.*?)</.+>', str_resp).group(1).replace(u'\u3000', '')
-        translation = re.search(r'◎译　　名(.*?)</.+>', str_resp).group(1).replace(u'\u3000', '')
+        try:
+            translation = re.search(r'◎译　　名(.*?)</.+>', str_resp).group(1).replace(u'\u3000', '')
+        except:
+            translation = ''
         # 名字
         items['name'] = title + "|" + translation
         # 年代
@@ -82,8 +61,10 @@ class DyttSlaverSpider(RedisCrawlSpider):
             items['score'] = response.xpath("//strong[@class='rank']/text()").extract()[0].replace(u'\u3000', '')
         except:
             items['score'] = '无评分'
-            # 语言
+        # 语言
         items['language'] = re.search(r'◎语　　言(.*?)</.+>', str_resp).group(1).replace(u'\u3000', '')
+        # 类别
+        items['movie_type'] = re.search(r'◎类　　别(.*?)</.+>', str_resp).group(1).replace(u'\u3000', '')
         # 上映日期
         items['release_date'] = re.search(r'◎上映日期(.*?)</.+>', str_resp).group(1).replace(u'\u3000', '')
         # 文件大小
@@ -97,7 +78,7 @@ class DyttSlaverSpider(RedisCrawlSpider):
         # 下载链接
         items['download_link'] = self.get_download_link(response.url)
 
-        print(items)
+        # print(items)
         yield items
 
     def get_download_link(self, url):

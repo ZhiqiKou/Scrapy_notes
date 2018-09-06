@@ -16,7 +16,25 @@ NEWSPIDER_MODULE = 'dytt_redis_slaver.spiders'
 
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
-USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87 UBrowser/6.2.4094.1 Safari/537.36'
+# USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87 UBrowser/6.2.4094.1 Safari/537.36'
+
+USER_AGENTS = [
+    'Mozilla/5.0 (X11; U; Linux x86_64; zh-CN; rv:1.9.2.10) Gecko/20100922 Ubuntu/10.10 (maverick) Firefox/3.6.10',
+    'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.71 Safari/537.36',
+    'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/30.0.1599.101 Safari/537.36',
+    'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.1 (KHTML, like Gecko) Chrome/21.0.1180.71 Safari/537.1 LBBROWSER',
+    'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/38.0.2125.122 UBrowser/4.0.3214.0 Safari/537.36',
+    'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87 UBrowser/6.2.4094.1 Safari/537.36'
+
+]
+
+PROXIES = [
+    {'ip_port': '118.190.95.43:9001', "user_passwd": None},
+    {'ip_port': '61.135.217.7:80', "user_passwd": None},
+    {'ip_port': '118.190.95.35:9001', "user_passwd": None},
+]
+
+
 
 # 指定使用scrapy-redis的调度器
 SCHEDULER = "scrapy_redis.scheduler.Scheduler"
@@ -43,7 +61,7 @@ SCHEDULER_PERSIST = True
 # ROBOTSTXT_OBEY = True
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
-#CONCURRENT_REQUESTS = 32
+# CONCURRENT_REQUESTS = 32
 
 # Configure a delay for requests for the same website (default: 0)
 # See https://doc.scrapy.org/en/latest/topics/settings.html#download-delay
@@ -73,9 +91,10 @@ DOWNLOAD_DELAY = 2
 
 # Enable or disable downloader middlewares
 # See https://doc.scrapy.org/en/latest/topics/downloader-middleware.html
-#DOWNLOADER_MIDDLEWARES = {
-#    'dytt_redis_slaver.middlewares.DyttRedisSlaverDownloaderMiddleware': 543,
-#}
+DOWNLOADER_MIDDLEWARES = {
+    'dytt_redis_slaver.middlewares.RandomUserAgent': 543,
+    # 'dytt_redis_slaver.middlewares.RandomProxy': 553,
+}
 
 # Enable or disable extensions
 # See https://doc.scrapy.org/en/latest/topics/extensions.html
@@ -87,7 +106,7 @@ DOWNLOAD_DELAY = 2
 # See https://doc.scrapy.org/en/latest/topics/item-pipeline.html
 # 通过配置RedisPipeline将item写入key为 spider.name : items 的redis的list中，供后面的分布式处理item
 ITEM_PIPELINES = {
-   'dytt_redis_slaver.pipelines.DyttRedisSlaverPipeline': 300,
+   # 'dytt_redis_slaver.pipelines.DyttRedisSlaverPipeline': 300,
    'dytt_redis_slaver.pipelines.InfoPipeline':350,
    'scrapy_redis.pipelines.RedisPipeline': 400
 }

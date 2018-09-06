@@ -7,6 +7,32 @@
 
 from scrapy import signals
 
+import random
+import base64
+from dytt_redis_slaver.settings import USER_AGENTS
+from dytt_redis_slaver.settings import PROXIES
+
+# 随机的User-Agent
+class RandomUserAgent(object):
+    def process_request(self, request, spider):
+        useragent = random.choice(USER_AGENTS)
+        #print useragent
+        request.headers.setdefault("User-Agent", useragent)
+
+# 随机的代理ip
+class RandomProxy(object):
+    def process_request(self, request, spider):
+        proxy = random.choice(PROXIES)
+        if proxy['user_passwd'] is None:
+            # 没有代理账户验证的代理使用方式
+            request.meta['proxy'] = "http://" + proxy['ip_port']
+
+        else:
+            # 对账户密码进行base64编码转换
+            base64_userpasswd = base64.b64encode(proxy['user_passwd'])
+            # 对应到代理服务器的信令格式里
+            request.headers['Proxy-Authorization'] = 'Basic ' + base64_userpasswd
+            request.meta['proxy'] = "http://" + proxy['ip_port']
 
 class DyttRedisSlaverSpiderMiddleware(object):
     # Not all methods need to be defined. If a method is not defined,
@@ -101,3 +127,4 @@ class DyttRedisSlaverDownloaderMiddleware(object):
 
     def spider_opened(self, spider):
         spider.logger.info('Spider opened: %s' % spider.name)
+
